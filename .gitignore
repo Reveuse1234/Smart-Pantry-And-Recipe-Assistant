@@ -1,0 +1,13 @@
+data/*.db
+data/pantry.db
+.DS_Store
+__pycache__/
+.pycache/
+.pycache_check/
+*.pyc
+.venv/
+venv/
+static/uploads/*
+!static/uploads/.gitkeep
+.env
+.hf_cache/
