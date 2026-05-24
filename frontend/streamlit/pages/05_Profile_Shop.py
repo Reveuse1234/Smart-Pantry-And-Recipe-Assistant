@@ -83,6 +83,7 @@ health_opts = [
 ]
 
 with st.form("prof"):
+    st.caption("Edit your settings below, then click **Save changes**.")
     st.markdown("##### Family plan (shared pantry)")
     hh_name = ""
     if hh:
@@ -125,7 +126,8 @@ with st.form("prof"):
         height=100,
         help="Mention sugar, salt, specific allergens, or substitutions you need.",
     )
-    if st.form_submit_button("Save profile & family plan", use_container_width=True):
+    st.divider()
+    if st.form_submit_button("Save changes", type="primary", use_container_width=True):
         try:
             api.patch_profile(
                 d,
@@ -137,8 +139,10 @@ with st.form("prof"):
             )
             if hh and hh_name.strip() and hh_name.strip() != str(hh.get("name") or ""):
                 api.patch_household(hh_name.strip())
+            _cached_me.clear()
+            _cached_household.clear()
             st.cache_data.clear()
-            st.success("Profile and family plan saved — recommendations will follow these preferences.")
+            st.success("Your changes were saved.")
             st.rerun()
         except Exception as e:
             st.error(str(e))
