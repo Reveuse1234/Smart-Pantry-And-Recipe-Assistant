@@ -7,4 +7,5 @@ PY="${PYTHON:-python}"
 if ! command -v "$PY" >/dev/null 2>&1; then
   PY=python3
 fi
+"$PY" --version
 exec "$PY" -m uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --log-level info

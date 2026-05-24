@@ -6,10 +6,11 @@ import json
 import re
 from typing import Any
 
-_STEP_LABEL_ONLY = re.compile(r"^(?i)step\s*\d+\s*[\):.\-]?\s*$")
+_STEP_LABEL_ONLY = re.compile(r"^step\s*\d+\s*[\):.\-]?\s*$", re.IGNORECASE)
 _SECTION_HEADER = re.compile(
-    r"^(?i)(directions|preparation|instructions?|method|marinade|marinating|sauce|gravy|"
-    r"topping|assembly|to serve|serving)\s*:?\s*$"
+    r"^(directions|preparation|instructions?|method|marinade|marinating|sauce|gravy|"
+    r"topping|assembly|to serve|serving)\s*:?\s*$",
+    re.IGNORECASE,
 )
 _MIN_STEP_CHARS = 10
 
@@ -107,9 +108,9 @@ def sanitize_steps(
 
 
 def _split_on_step_headers(s: str) -> list[str] | None:
-    if not re.search(r"(?i)step\s*\d+", s):
+    if not re.search(r"step\s*\d+", s, re.IGNORECASE):
         return None
-    chunks = re.split(r"(?i)(?:^|\n)\s*step\s*\d+\s*[\):.\-]?\s*", s)
+    chunks = re.split(r"(?:^|\n)\s*step\s*\d+\s*[\):.\-]?\s*", s, flags=re.IGNORECASE)
     cleaned: list[str] = []
     for c in chunks:
         c = c.strip()

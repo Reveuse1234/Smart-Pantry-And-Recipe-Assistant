@@ -171,7 +171,7 @@ def meal_to_recipe_row(detail: dict[str, Any], *, cuisine_override: str | None =
     steps = parse_instruction_steps(instructions)
     if len(steps) < 3:
         steps = expand_to_clear_steps(instructions, min_steps=3)
-    if len(steps) >= 3 and not re.search(r"(?i)step\s*1", instructions):
+    if len(steps) >= 3 and not re.search(r"step\s*1", instructions, re.IGNORECASE):
         instructions = format_steps_as_instructions(steps)
     serv = detail.get("servings") or "4"
     try:

@@ -97,7 +97,7 @@ def _normalize_dataset_entry(raw: dict[str, Any]) -> dict[str, Any]:
         img = placeholder_image_url(abs(crc32(nm.encode("utf-8", errors="ignore"))) % 7)
     steps = steps_from_dataset_entry(raw)
     instr = str(raw.get("instructions") or "").strip()
-    if steps and len(steps) >= 3 and not re.search(r"(?i)step\s*1", instr):
+    if steps and len(steps) >= 3 and not re.search(r"step\s*1", instr, re.IGNORECASE):
         instr = format_steps_as_instructions(steps)
     elif not instr:
         instr = "Prepare ingredients and cook until done."
