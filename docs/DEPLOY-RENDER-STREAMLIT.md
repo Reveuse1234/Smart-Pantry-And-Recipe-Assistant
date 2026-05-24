@@ -15,7 +15,21 @@ If only Render is deployed, opening the Render link in a browser is **not** the 
 2. **Start command:** `cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 3. **Environment:** `PYTHON_VERSION=3.11.9`, `PANTRY_SECRET=<secret>`
 4. After Streamlit exists: `CORS_ORIGINS=https://your-app.streamlit.app`
-5. Test: `https://YOUR-API.onrender.com/health` → `{"status":"ok"}`
+5. Test: `https://YOUR-API.onrender.com/health` → `{"status":"ok"}` (or `/live` for a quick ping with no DB check)
+6. If the URL **hangs** with no JSON: open **Render → Logs**. The process is not listening — usually wrong build (`requirements.txt` instead of `requirements-render.txt`), wrong start command, or a crash on boot. Redeploy after fixing.
+
+**Render environment (recommended):**
+
+| Variable | Example |
+|----------|---------|
+| `PYTHON_VERSION` | `3.11.9` |
+| `PANTRY_SECRET` | long random string (same as Streamlit) |
+| `CORS_ORIGINS` | `https://your-app.streamlit.app` |
+| `AUTO_DISH_IMAGE_BACKFILL` | `0` (on free tier) |
+| `AUTO_THEMEALDB_IMAGE_SEARCH` | `0` (on free tier) |
+| `AUTO_THEMEALDB_ENRICH` | `0` (no bulk network import on boot) |
+| `AUTO_KASHMIRI_THEMEALDB` | `0` |
+| `SMART_PANTRY_BLOCKING_SEED` | `0` |
 
 ## Streamlit Cloud (UI)
 

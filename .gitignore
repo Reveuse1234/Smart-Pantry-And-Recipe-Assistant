@@ -1,4 +1,6 @@
 data/*.db
+data/*.db-wal
+data/*.db-shm
 data/pantry.db
 .DS_Store
 .hf_cache/

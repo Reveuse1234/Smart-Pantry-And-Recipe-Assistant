@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlparse
 
 import httpx
 import streamlit as st
@@ -13,13 +14,31 @@ LAUNCH_HINT = (
     "From the project folder run **`python run_pantryflow.py`** — it starts the API and this web app together."
 )
 
+CLOUD_DEPLOY_HINT = (
+    "**Streamlit Cloud + Render:** open **`BACKEND_URL/health`** in a browser. You should see "
+    '`{"status":"ok"}`. If the page hangs or errors, fix the **Render** service first '
+    "(Dashboard → Logs: build must use `requirements-render.txt`, start "
+    "`cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT`). "
+    "Free tier can take **~60s** to wake after sleep — refresh and wait.\n\n"
+    "On Render set **`PANTRY_SECRET`** and **`CORS_ORIGINS`** to your exact "
+    "`https://….streamlit.app` URL. Match **`PANTRY_SECRET`** in Streamlit secrets, then **Reboot app**."
+)
+
+
+def _is_local_backend(url: str) -> bool:
+    host = (urlparse(url).hostname or "").lower()
+    return host in ("127.0.0.1", "localhost", "::1")
+
 
 def _health_urls_to_try() -> list[str]:
-    """Probe configured API URL first, then common local fallbacks (mis-set BACKEND_URL is common)."""
+    """Probe configured API URL; only fall back to localhost when BACKEND_URL is local."""
+    base = DEFAULT_BASE.rstrip("/")
+    if not _is_local_backend(base):
+        return [base]
     seen: set[str] = set()
     out: list[str] = []
     for u in (
-        DEFAULT_BASE.rstrip("/"),
+        base,
         f"http://127.0.0.1:{os.environ.get('API_PORT', '8000').strip() or '8000'}",
         "http://localhost:8000",
     ):
@@ -29,19 +48,38 @@ def _health_urls_to_try() -> list[str]:
     return out
 
 
+def _probe_timeout(base: str) -> float:
+    """Render cold starts and free-tier wake-ups need longer than local dev."""
+    if not _is_local_backend(base):
+        return 90.0
+    return 3.0
+
+
 @st.cache_data(ttl=8, show_spinner=False)
 def _backend_health_probe() -> tuple[bool, str]:
     """Return (ok, detail) where detail names the first working base or explains failure."""
     last_err = "no response"
     for base in _health_urls_to_try():
+        timeout = _probe_timeout(base)
         try:
-            r = httpx.get(f"{base}/health", timeout=2.0)
+            r = httpx.get(f"{base}/health", timeout=timeout)
             if r.status_code == 200:
                 return True, base
+            if r.status_code == 503:
+                return False, f"{base} is running but database check failed (503)"
         except httpx.RequestError as e:
-            last_err = str(e)[:120]
+            last_err = str(e)[:160]
+            try:
+                live = httpx.get(f"{base}/live", timeout=timeout)
+                if live.status_code == 200:
+                    return False, (
+                        f"{base} answered /live but /health did not — server may still be starting; "
+                        "wait ~60s and refresh"
+                    )
+            except httpx.RequestError as e2:
+                last_err = str(e2)[:160]
         except Exception as e:
-            last_err = str(e)[:120]
+            last_err = str(e)[:160]
     return False, last_err
 
 
@@ -57,10 +95,16 @@ def maybe_show_backend_unavailable_banner() -> None:
                 + LAUNCH_HINT
             )
         return
-    st.warning(
-        "The Smart Pantry **API** is not reachable from this app, so sign-in and data views will not work until it is running.\n\n"
-        f"Tried: {', '.join(_health_urls_to_try())} — last error: `{detail}`\n\n"
-        + LAUNCH_HINT
+    tried = ", ".join(_health_urls_to_try())
+    remote = not _is_local_backend(DEFAULT_BASE.rstrip("/"))
+    extra = CLOUD_DEPLOY_HINT if remote else (
+        LAUNCH_HINT
         + "\n\n**If the web page itself would not load:** use **http://127.0.0.1:8501** on the same computer, "
         "or **http://YOUR-WIFI-IP:8501** from a phone (same Wi‑Fi). Restart after changing network."
+    )
+    st.warning(
+        "The Smart Pantry **API** is not reachable from this app, so sign-in and data views will not work until it is running.\n\n"
+        f"Configured **`BACKEND_URL`**: `{DEFAULT_BASE}`\n\n"
+        f"Tried: {tried} — last error: `{detail}`\n\n"
+        + extra
     )

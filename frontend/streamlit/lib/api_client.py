@@ -7,10 +7,22 @@ from typing import Any
 
 import httpx
 
-_backend_url = os.environ.get("BACKEND_URL", "").strip()
-if not _backend_url:
-    _backend_url = "http://127.0.0.1:8000"
-DEFAULT_BASE = _backend_url.rstrip("/")
+def _resolve_backend_url() -> str:
+    env = os.environ.get("BACKEND_URL", "").strip()
+    if env:
+        return env.rstrip("/")
+    try:
+        import streamlit as st
+
+        secret = st.secrets.get("BACKEND_URL", "")
+        if secret:
+            return str(secret).strip().rstrip("/")
+    except Exception:
+        pass
+    return "http://127.0.0.1:8000"
+
+
+DEFAULT_BASE = _resolve_backend_url()
 
 
 class PantryAPI:

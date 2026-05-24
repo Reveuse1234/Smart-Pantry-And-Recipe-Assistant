@@ -34,15 +34,19 @@ def _run_recipe_seed() -> None:
         db.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    ensure_schema()
+def _deferred_startup() -> None:
     if os.environ.get("SMART_PANTRY_BLOCKING_SEED", "").strip().lower() in ("1", "true", "yes"):
         _run_recipe_seed()
     else:
         threading.Thread(target=_run_recipe_seed, name="recipe-seed", daemon=True).start()
     start_scheduler(expiry_interval_minutes=60)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    init_db()
+    ensure_schema()
+    threading.Thread(target=_deferred_startup, name="deferred-startup", daemon=True).start()
     yield
     stop_scheduler()
 
@@ -91,6 +95,12 @@ def root():
 def favicon():
     """Browsers request this automatically; avoid noisy 404 in logs."""
     return Response(status_code=204)
+
+
+@app.get("/live", include_in_schema=False)
+def live():
+    """Fast liveness (no DB) — useful when the process is waking on Render."""
+    return {"status": "ok"}
 
 
 @app.get("/health")

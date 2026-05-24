@@ -5,7 +5,6 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models import Recipe, User
 from app.schemas.recommendation import RecommendationOut
-from app.services.ai_recommendations import get_ai_recommendations, rules_based_recommendations
 from app.services.household_utils import get_household_for_user, parse_json_list
 from app.services.recipe_catalog import is_app_catalog_cuisine
 from app.services.recipe_engine import pantry_normalized_names, recipe_matches_user_filters, score_recipe
@@ -16,6 +15,8 @@ router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 @router.get("/rules", response_model=list[RecommendationOut])
 def recommendations_rules(limit: int = 20, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Classic overlap + substitution scoring (no LLM)."""
+    from app.services.ai_recommendations import rules_based_recommendations
+
     rows = rules_based_recommendations(db, user, [], limit)
     return [RecommendationOut(**r) for r in rows]
 
@@ -23,6 +24,8 @@ def recommendations_rules(limit: int = 20, user: User = Depends(get_current_user
 @router.get("/ai", response_model=list[RecommendationOut])
 def recommendations_ai(limit: int = 12, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Hybrid TF-IDF + pantry match; OpenAI rerank when OPENAI_API_KEY is set."""
+    from app.services.ai_recommendations import get_ai_recommendations
+
     rows = get_ai_recommendations(db, user, limit=limit)
     return [RecommendationOut(**r) for r in rows]
 

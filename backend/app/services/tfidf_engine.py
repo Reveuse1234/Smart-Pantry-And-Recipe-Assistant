@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 from app.models import Recipe
+
+if TYPE_CHECKING:
+    from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def _recipe_ingredient_text(recipe: Recipe) -> str:
@@ -33,9 +35,11 @@ def _token_prep(s: str) -> str:
 class TfidfRecipeIndex:
     recipes: list[Recipe]
     matrix: np.ndarray
-    vectorizer: TfidfVectorizer
+    vectorizer: Any
 
     def pantry_scores(self, pantry_item_names: list[str]) -> list[tuple[Recipe, float]]:
+        from sklearn.metrics.pairwise import cosine_similarity
+
         if not self.recipes or self.matrix.size == 0:
             return []
         q_text = _token_prep(" ".join(pantry_item_names))
@@ -45,6 +49,8 @@ class TfidfRecipeIndex:
         return [(self.recipes[i], float(sims[i])) for i in order if sims[i] > 0]
 
     def similar_recipes(self, recipe: Recipe, top_k: int = 5) -> list[tuple[Recipe, float]]:
+        from sklearn.metrics.pairwise import cosine_similarity
+
         ids = [r.id for r in self.recipes]
         if not self.recipes or recipe.id not in ids:
             return []
@@ -62,6 +68,8 @@ class TfidfRecipeIndex:
 
 
 def build_recipe_index(recipes: list[Recipe]) -> TfidfRecipeIndex:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
     texts = [_token_prep(_recipe_ingredient_text(r) + " " + (r.name or "").lower()) for r in recipes]
     if not texts or all(not t.strip() for t in texts):
         return TfidfRecipeIndex(recipes=list(recipes), matrix=np.array([]).reshape(0, 0), vectorizer=TfidfVectorizer())

@@ -36,9 +36,18 @@ def _friendly_auth_error(err: Exception) -> str:
     if isinstance(err, httpx.TimeoutException):
         return "The request took too long. Check your connection and try again."
     if isinstance(err, httpx.RequestError):
+        from urllib.parse import urlparse
+
+        host = (urlparse(DEFAULT_BASE).hostname or "").lower()
+        if host not in ("127.0.0.1", "localhost", "::1"):
+            return (
+                f"Cannot reach the API at `{DEFAULT_BASE}`. "
+                "Open that URL with `/health` in a browser — it should return "
+                '`{"status":"ok"}`. If not, check the Render service logs and redeploy.'
+            )
         return (
             f"Cannot reach the server at `{DEFAULT_BASE}`. "
-            "From the project folder run `python run_pantryflow.py` (starts the API and this app)."
+            "From the project folder run `python3 run_pantryflow.py` (starts the API and this app)."
         )
     if isinstance(err, httpx.HTTPStatusError):
         detail = ""
