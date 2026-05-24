@@ -1,5 +1,8 @@
 import json
+import logging
 from typing import Any, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -33,6 +36,53 @@ from app.services.substitutions import SUBSTITUTION_GROUPS, substitution_hint
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
+def _recipe_out_row(r: Recipe) -> RecipeOut:
+    """Build API row with safe defaults (cloud DB rows may have nulls)."""
+    try:
+        image_url = resolve_stored_or_dataset_image(
+            getattr(r, "image_url", None),
+            name=r.name or "",
+            cuisine=r.cuisine,
+        )
+    except Exception:
+        image_url = (getattr(r, "image_url", None) or "") or ""
+    return RecipeOut(
+        id=int(r.id),
+        name=(r.name or "").strip() or "Untitled",
+        cuisine=(r.cuisine or "").strip() or "Unknown",
+        prep_minutes=int(r.prep_minutes) if r.prep_minutes is not None else 30,
+        calories_per_serving=int(r.calories_per_serving) if r.calories_per_serving is not None else 0,
+        servings=int(r.servings) if r.servings is not None else 4,
+        image_url=image_url or "",
+    )
+
+
+def _query_catalog_recipes(
+    db: Session,
+    *,
+    cuisine: Optional[str],
+    q: Optional[str],
+) -> list[Recipe]:
+    query = db.query(Recipe).filter(Recipe.cuisine.in_(ALLOWED_APP_CUISINES))
+    if cuisine:
+        query = query.filter(Recipe.cuisine == cuisine)
+    if q and q.strip():
+        query = query.filter(Recipe.name.ilike(f"%{q.strip()}%"))
+    return query.order_by(Recipe.cuisine, Recipe.name, Recipe.id).all()
+
+
+def _ensure_catalog_seeded(db: Session) -> None:
+    """On fresh Render SQLite, background seed may not have finished yet."""
+    from app.services.catalog_fill import merge_bundled_catalog_recipes, top_up_catalog_to_minimum
+
+    try:
+        merge_bundled_catalog_recipes(db)
+        top_up_catalog_to_minimum(db)
+    except Exception:
+        logger.exception("Inline catalog seed failed")
+        db.rollback()
+
+
 @router.get("", response_model=List[RecipeOut])
 def list_recipes(
     cuisine: Optional[str] = None,
@@ -41,35 +91,23 @@ def list_recipes(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    query = db.query(Recipe).filter(Recipe.cuisine.in_(ALLOWED_APP_CUISINES))
-    if cuisine:
-        if cuisine not in ALLOWED_APP_CUISINES:
-            raise HTTPException(
-                400,
-                "Unknown cuisine; use Kashmiri, Indian, Italian, Chinese, or Middle Eastern.",
-            )
-        query = query.filter(Recipe.cuisine == cuisine)
-    if q and q.strip():
-        query = query.filter(Recipe.name.ilike(f"%{q.strip()}%"))
-    rows = query.order_by(Recipe.cuisine, Recipe.name, Recipe.id).all()
-    deduped = dedupe_recipe_orm(rows)
-    out: list[RecipeOut] = []
-    for r in deduped[: min(max(1, limit), 5000)]:
-        out.append(
-            RecipeOut(
-                id=r.id,
-                name=r.name,
-                cuisine=r.cuisine,
-                prep_minutes=r.prep_minutes,
-                calories_per_serving=r.calories_per_serving,
-                servings=r.servings,
-                image_url=resolve_stored_or_dataset_image(
-                    getattr(r, "image_url", None),
-                    name=r.name,
-                    cuisine=r.cuisine,
-                ),
-            )
+    if cuisine and cuisine not in ALLOWED_APP_CUISINES:
+        raise HTTPException(
+            400,
+            "Unknown cuisine; use Kashmiri, Indian, Italian, Chinese, or Middle Eastern.",
         )
+    rows = _query_catalog_recipes(db, cuisine=cuisine, q=q)
+    if not rows:
+        _ensure_catalog_seeded(db)
+        rows = _query_catalog_recipes(db, cuisine=cuisine, q=q)
+    deduped = dedupe_recipe_orm(rows)
+    cap = min(max(1, limit), 5000)
+    out: list[RecipeOut] = []
+    for r in deduped[:cap]:
+        try:
+            out.append(_recipe_out_row(r))
+        except Exception:
+            logger.exception("Skipping recipe id=%s during list serialization", getattr(r, "id", None))
     return out
 
 

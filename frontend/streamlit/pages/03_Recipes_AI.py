@@ -5,9 +5,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from typing import Optional
 
+import httpx
 import pandas as pd
 import streamlit as st
 from lib.api_client import PantryAPI
+from lib.api_errors import api_error_message
+from lib.auth_persist import clear_auth_token
 from lib.recipe_catalog_constants import APP_CATALOG_CUISINES_ORDERED
 from lib.dish_images import render_dish_image_or_unavailable, trusted_dish_image_url
 from lib.recipe_steps_ui import render_guide_steps, render_plain_steps, resolve_display_steps
@@ -43,7 +46,22 @@ if _highlight_rid is not None:
         _jump_brief = None
         st.warning("That recipe could not be loaded. It may have been removed from the catalog.")
 
-BROWSE_PER_CUISINE = 2000
+BROWSE_PER_CUISINE = 500
+
+
+def _load_recipes_for_browse(token: str, cuisine: str, search: str) -> list[dict]:
+    try:
+        return _cached_recipes(token, cuisine, search)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code in (401, 403):
+            clear_auth_token()
+            st.warning("Your session expired. Please sign in again from **Home**.")
+            st.stop()
+        st.error(api_error_message(e))
+        st.stop()
+    except Exception as e:
+        st.error(api_error_message(e))
+        st.stop()
 
 
 def _summary_row_from_detail(d: dict) -> dict:
@@ -260,9 +278,9 @@ st.subheader("Recipes")
 if choice is None:
     st.info("Select a **cuisine** above to browse recipes.")
 else:
-    all_rows = list(_cached_recipes(tok, choice, sq)[:BROWSE_PER_CUISINE])
+    all_rows = list(_load_recipes_for_browse(tok, choice, sq)[:BROWSE_PER_CUISINE])
     if _highlight_rid is not None and sq:
-        full_list = list(_cached_recipes(tok, choice, "")[:BROWSE_PER_CUISINE])
+        full_list = list(_load_recipes_for_browse(tok, choice, "")[:BROWSE_PER_CUISINE])
         pin = int(_highlight_rid)
         if any(int(r.get("id") or 0) == pin for r in full_list) and not any(
             int(r.get("id") or 0) == pin for r in all_rows

@@ -193,7 +193,7 @@ class PantryAPI:
             params["cuisine"] = cuisine
         if search and search.strip():
             params["q"] = search.strip()
-        r = httpx.get(f"{self.base}/api/v1/recipes", headers=self._headers(), params=params, timeout=30.0)
+        r = httpx.get(f"{self.base}/api/v1/recipes", headers=self._headers(), params=params, timeout=90.0)
         r.raise_for_status()
         return r.json()
 
