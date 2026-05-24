@@ -36,16 +36,21 @@ from app.services.substitutions import SUBSTITUTION_GROUPS, substitution_hint
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
-def _recipe_out_row(r: Recipe) -> RecipeOut:
-    """Build API row with safe defaults (cloud DB rows may have nulls)."""
-    try:
-        image_url = resolve_stored_or_dataset_image(
-            getattr(r, "image_url", None),
-            name=r.name or "",
-            cuisine=r.cuisine,
-        )
-    except Exception:
-        image_url = (getattr(r, "image_url", None) or "") or ""
+def _recipe_out_row(r: Recipe, *, resolve_images: bool = False) -> RecipeOut:
+    """Build API row with safe defaults (cloud DB rows may have nulls).
+
+    List endpoints skip per-row image lookup for speed; detail views resolve images.
+    """
+    image_url = (getattr(r, "image_url", None) or "") or ""
+    if resolve_images:
+        try:
+            image_url = resolve_stored_or_dataset_image(
+                getattr(r, "image_url", None),
+                name=r.name or "",
+                cuisine=r.cuisine,
+            ) or image_url
+        except Exception:
+            pass
     return RecipeOut(
         id=int(r.id),
         name=(r.name or "").strip() or "Untitled",

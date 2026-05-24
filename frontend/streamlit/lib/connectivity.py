@@ -85,7 +85,14 @@ def _backend_health_probe() -> tuple[bool, str]:
 
 
 def maybe_show_backend_unavailable_banner() -> None:
+    # Signed-in pages already talk to the API; skip the probe on every navigation.
+    if st.session_state.get("token"):
+        return
+    if st.session_state.get("_pf_backend_ok"):
+        return
     ok, detail = _backend_health_probe()
+    if ok:
+        st.session_state["_pf_backend_ok"] = True
     if ok:
         if detail.rstrip("/") != DEFAULT_BASE.rstrip("/"):
             st.warning(

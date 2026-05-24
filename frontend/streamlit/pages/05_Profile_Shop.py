@@ -8,7 +8,7 @@ from lib.api_client import PantryAPI
 from lib.auth_persist import clear_auth_token
 from lib.calorie_ui import render_calorie_tracking
 from lib.recipe_catalog_constants import APP_CATALOG_CUISINES_ORDERED
-from lib.ui import hero, inject_pastel_theme, notification_panel, sidebar_nav
+from lib.ui import hero, inject_pastel_theme, sidebar_nav
 
 st.set_page_config(page_title="Profile", layout="wide")
 inject_pastel_theme()
@@ -21,32 +21,32 @@ api = PantryAPI(token=st.session_state.token)
 sidebar_nav("Profile")
 
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=120, show_spinner=False)
 def _cached_me(token: str):
     return PantryAPI(token=token).me()
 
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=120, show_spinner=False)
 def _cached_calories(token: str):
     return PantryAPI(token=token).calories_list()
 
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=120, show_spinner=False)
 def _cached_household(token: str):
     return PantryAPI(token=token).household()
 
 
-me = _cached_me(st.session_state.token)
-cal_rows = _cached_calories(st.session_state.token)
-hh = _cached_household(st.session_state.token)
+_tok = st.session_state.token
+with st.spinner("Loading profile…"):
+    me = _cached_me(_tok)
+    cal_rows = _cached_calories(_tok)
+    hh = _cached_household(_tok)
 all_cuisines = list(APP_CATALOG_CUISINES_ORDERED)
 
 hero(
     "Profile",
     "Account, family plan, health & diet, cuisines, and calorie tracking.",
 )
-
-notification_panel(api)
 
 _, top_r = st.columns([5, 1])
 with top_r:

@@ -80,6 +80,7 @@ def clear_auth_token() -> None:
     """Sign out: drop session token and cookie."""
     _ensure_token_key()
     st.session_state.token = None
+    st.session_state.pop("_pf_backend_ok", None)
     cm = _cookie_manager()
     try:
         cm.delete(COOKIE_NAME, key="pf_cookie_delete")

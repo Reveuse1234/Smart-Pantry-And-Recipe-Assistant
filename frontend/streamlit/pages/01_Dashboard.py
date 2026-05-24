@@ -41,9 +41,21 @@ def _cached_me(token: str):
     return PantryAPI(token=token).me()
 
 
-pantry = _cached_pantry(st.session_state.token)
-me = _cached_me(st.session_state.token)
-cal_rows = _cached_calories(st.session_state.token)
+from concurrent.futures import ThreadPoolExecutor
+
+_tok = st.session_state.token
+
+
+def _load_dashboard_data(token: str) -> tuple[list, dict, list]:
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_p = pool.submit(_cached_pantry, token)
+        f_m = pool.submit(_cached_me, token)
+        f_c = pool.submit(_cached_calories, token)
+        return f_p.result(), f_m.result(), f_c.result()
+
+
+with st.spinner("Loading dashboard…"):
+    pantry, me, cal_rows = _load_dashboard_data(_tok)
 today = dt.date.today()
 
 

@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 from lib.api_client import PantryAPI
-from lib.ui import hero, inject_pastel_theme, notification_panel, sidebar_nav
+from lib.ui import hero, inject_pastel_theme, sidebar_nav
 
 st.set_page_config(page_title="Shopping", layout="wide")
 inject_pastel_theme()
@@ -22,10 +22,8 @@ hero(
     "Items appear here only when you add them manually or from a recipe using **Add selected to grocery list**.",
 )
 
-notification_panel(api)
 
-
-@st.cache_data(ttl=15, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _cached_shopping(token: str):
     return PantryAPI(token=token).shopping_list()
 

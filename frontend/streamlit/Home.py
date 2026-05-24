@@ -165,7 +165,7 @@ def _home_reco_bundle(token: str) -> tuple[list, list]:
         except Exception:
             ai = []
     try:
-        rules = api.recommendations_rules(limit=32)
+        rules = api.recommendations_rules(limit=24)
     except Exception:
         rules = []
     return ai if isinstance(ai, list) else [], rules if isinstance(rules, list) else []
@@ -304,7 +304,7 @@ def _home_feed_pool(token: str) -> list[dict]:
     ai, rules = _home_reco_bundle(token)
     head = _feed_cards_with_images(_dedupe_feed_cards(_feed_cards_from_recommendations(ai, rules)))
     try:
-        catalog = api.recipes(limit=200)
+        catalog = api.recipes(limit=120)
     except Exception:
         catalog = []
     return _merge_catalog_into_feed(head, catalog if isinstance(catalog, list) else [])
@@ -521,7 +521,8 @@ else:
     if "home_feed_visible" not in st.session_state:
         st.session_state.home_feed_visible = HOME_FEED_PAGE_SIZE
 
-    pool = _home_feed_pool(tok)
+    with st.status("Loading recipes…", expanded=False):
+        pool = _home_feed_pool(tok)
     visible_n = min(int(st.session_state.home_feed_visible), len(pool))
     rec_items = pool[:visible_n]
 

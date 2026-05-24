@@ -1,5 +1,14 @@
 # Smart Pantry — separated frontend & backend
 
+## Live app
+
+| | URL |
+|---|-----|
+| **Open the app** | https://smart-pantry-and-recipe-assistant-c6jnsjedabfmbrga9afsbx.streamlit.app |
+| **API (health)** | https://smart-pantry-and-recipe-assistant-1.onrender.com/health |
+
+Deploy notes: [docs/DEPLOY-RENDER-STREAMLIT.md](docs/DEPLOY-RENDER-STREAMLIT.md)
+
 ## Layout
 
 ```text

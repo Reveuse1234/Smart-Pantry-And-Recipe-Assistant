@@ -185,7 +185,7 @@ def notification_panel(api) -> None:
                 st.rerun()
 
 
-@st.cache_data(ttl=20, show_spinner=False)
+@st.cache_data(ttl=120, show_spinner=False)
 def _cached_notifications(base_url: str, token: str) -> tuple[dict, list[dict]]:
     api = PantryAPI(base_url=base_url, token=token)
     return api.expiry_notification_count(), api.expiry_notifications()

@@ -14,7 +14,7 @@ from lib.auth_persist import clear_auth_token
 from lib.recipe_catalog_constants import APP_CATALOG_CUISINES_ORDERED
 from lib.dish_images import render_dish_image_or_unavailable, trusted_dish_image_url
 from lib.recipe_steps_ui import render_guide_steps, render_plain_steps, resolve_display_steps
-from lib.ui import hero, inject_pastel_theme, notification_panel, sidebar_nav
+from lib.ui import hero, inject_pastel_theme, sidebar_nav
 
 st.set_page_config(page_title="Recipes", layout="wide")
 inject_pastel_theme()
@@ -240,9 +240,15 @@ def _cached_recipe_detail(token: str, rid: int, servings: int):
     return PantryAPI(token=token).recipe(rid, servings=servings)
 
 
-hero("Recipes", "")
+@st.cache_data(ttl=600, show_spinner=False)
+def _cached_substitution_groups(token: str) -> list:
+    try:
+        return PantryAPI(token=token).substitution_groups().get("groups") or []
+    except Exception:
+        return []
 
-notification_panel(api)
+
+hero("Recipes", "")
 
 q1, q2 = st.columns([2, 1])
 with q1:
@@ -263,14 +269,12 @@ sq = search_q.strip()
 st.divider()
 with st.expander("Ingredient substitution guide", expanded=False):
     st.caption("Common swap groups when you are missing an ingredient (shown per recipe under Pantry coverage).")
-    try:
-        groups = api.substitution_groups().get("groups") or []
-        if not groups:
-            st.caption("No substitution groups loaded.")
+    groups = _cached_substitution_groups(tok)
+    if not groups:
+        st.caption("No substitution groups loaded.")
+    else:
         for g in groups[:14]:
             st.markdown(f"- {' · '.join(g)}")
-    except Exception:
-        st.caption("Could not load substitution groups — check that the API is running.")
 
 st.divider()
 st.subheader("Recipes")
@@ -278,7 +282,8 @@ st.subheader("Recipes")
 if choice is None:
     st.info("Select a **cuisine** above to browse recipes.")
 else:
-    all_rows = list(_load_recipes_for_browse(tok, choice, sq)[:BROWSE_PER_CUISINE])
+    with st.status(f"Loading {choice} recipes…", expanded=False):
+        all_rows = list(_load_recipes_for_browse(tok, choice, sq)[:BROWSE_PER_CUISINE])
     if _highlight_rid is not None and sq:
         full_list = list(_load_recipes_for_browse(tok, choice, "")[:BROWSE_PER_CUISINE])
         pin = int(_highlight_rid)

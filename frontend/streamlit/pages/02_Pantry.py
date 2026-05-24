@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 from lib.api_client import PantryAPI
 from lib.expiry_ui import expiry_card_html
-from lib.ui import hero, inject_pastel_theme, notification_panel, sidebar_nav
+from lib.ui import hero, inject_pastel_theme, sidebar_nav
 
 st.set_page_config(page_title="Ingredients", layout="wide")
 inject_pastel_theme()
@@ -22,10 +22,8 @@ hero(
     "Build your inventory with manual entry or the barcode scanner (camera or photo).",
 )
 
-notification_panel(api)
 
-
-@st.cache_data(ttl=15, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _cached_pantry_items(token: str):
     return PantryAPI(token=token).pantry_list()
 
