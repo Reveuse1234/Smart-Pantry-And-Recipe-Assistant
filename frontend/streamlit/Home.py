@@ -147,15 +147,25 @@ def _inject_home_feed_css() -> None:
     st.session_state["_pf_home_feed_css_insta"] = True
 
 
-@st.cache_data(ttl=45, show_spinner=False)
+def _cloud_backend() -> bool:
+    from urllib.parse import urlparse
+
+    host = (urlparse(DEFAULT_BASE).hostname or "").lower()
+    return host.endswith(".onrender.com")
+
+
+@st.cache_data(ttl=120, show_spinner=False)
 def _home_reco_bundle(token: str) -> tuple[list, list]:
+    """Rules-based picks only on cloud (AI/TF-IDF is slow on Render free tier)."""
     api = PantryAPI(token=token)
+    ai: list = []
+    if not _cloud_backend():
+        try:
+            ai = api.recommendations_ai(limit=16)
+        except Exception:
+            ai = []
     try:
-        ai = api.recommendations_ai(limit=48)
-    except Exception:
-        ai = []
-    try:
-        rules = api.recommendations_rules(limit=80)
+        rules = api.recommendations_rules(limit=32)
     except Exception:
         rules = []
     return ai if isinstance(ai, list) else [], rules if isinstance(rules, list) else []
@@ -287,13 +297,14 @@ def _merge_catalog_into_feed(primary: list[dict], catalog_rows: list[dict]) -> l
     return out
 
 
-@st.cache_data(ttl=120, show_spinner=False)
+@st.cache_data(ttl=180, show_spinner=False)
 def _home_feed_pool(token: str) -> list[dict]:
-    """Full home feed: personalized picks first, then all other recipes with verified photos."""
+    """Full home feed: personalized picks first, then catalog recipes with verified photos."""
+    api = PantryAPI(token=token)
     ai, rules = _home_reco_bundle(token)
     head = _feed_cards_with_images(_dedupe_feed_cards(_feed_cards_from_recommendations(ai, rules)))
     try:
-        catalog = PantryAPI(token=token).recipes(limit=5000)
+        catalog = api.recipes(limit=200)
     except Exception:
         catalog = []
     return _merge_catalog_into_feed(head, catalog if isinstance(catalog, list) else [])
@@ -437,9 +448,8 @@ if st.session_state.token is None:
                             st.error(f"Registration failed: {_friendly_auth_error(e)}")
 else:
     try:
-        with st.spinner("Loading your home…"):
-            api = PantryAPI(token=st.session_state.token)
-            api.me()
+        api = PantryAPI(token=st.session_state.token)
+        api.me()
     except httpx.RequestError:
         st.info("The server is unreachable. When it is back, use **Reload** in the Streamlit menu or press **R**.")
         st.stop()

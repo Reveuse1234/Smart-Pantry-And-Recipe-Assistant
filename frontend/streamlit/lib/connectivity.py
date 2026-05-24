@@ -48,38 +48,37 @@ def _health_urls_to_try() -> list[str]:
     return out
 
 
-def _probe_timeout(base: str) -> float:
-    """Render cold starts and free-tier wake-ups need longer than local dev."""
-    if not _is_local_backend(base):
-        return 90.0
-    return 3.0
+def _probe_timeout(base: str, *, quick: bool) -> float:
+    """Fast /live probe on cloud; slightly longer only when waking a cold Render instance."""
+    if _is_local_backend(base):
+        return 3.0
+    return 8.0 if quick else 20.0
 
 
-@st.cache_data(ttl=8, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _backend_health_probe() -> tuple[bool, str]:
     """Return (ok, detail) where detail names the first working base or explains failure."""
     last_err = "no response"
     for base in _health_urls_to_try():
-        timeout = _probe_timeout(base)
         try:
-            r = httpx.get(f"{base}/health", timeout=timeout)
-            if r.status_code == 200:
-                return True, base
-            if r.status_code == 404:
+            live = httpx.get(f"{base}/live", timeout=_probe_timeout(base, quick=True))
+            if live.status_code == 404:
                 return False, f"{base} returned 404 — wrong URL or deleted Render service; update BACKEND_URL"
-            if r.status_code == 503:
-                return False, f"{base} is running but database check failed (503)"
         except httpx.RequestError as e:
             last_err = str(e)[:160]
-            try:
-                live = httpx.get(f"{base}/live", timeout=timeout)
-                if live.status_code == 200:
-                    return False, (
-                        f"{base} answered /live but /health did not — server may still be starting; "
-                        "wait ~60s and refresh"
-                    )
-            except httpx.RequestError as e2:
-                last_err = str(e2)[:160]
+            continue
+        try:
+            r = httpx.get(f"{base}/health", timeout=_probe_timeout(base, quick=False))
+            if r.status_code == 200:
+                return True, base
+            if r.status_code == 503:
+                return False, f"{base} is running but database check failed (503)"
+            if live.status_code == 200:
+                return True, base
+        except httpx.RequestError as e:
+            last_err = str(e)[:160]
+            if live.status_code == 200:
+                return True, base
         except Exception as e:
             last_err = str(e)[:160]
     return False, last_err

@@ -46,7 +46,7 @@ if _highlight_rid is not None:
         _jump_brief = None
         st.warning("That recipe could not be loaded. It may have been removed from the catalog.")
 
-BROWSE_PER_CUISINE = 500
+BROWSE_PER_CUISINE = 120
 
 
 def _load_recipes_for_browse(token: str, cuisine: str, search: str) -> list[dict]:

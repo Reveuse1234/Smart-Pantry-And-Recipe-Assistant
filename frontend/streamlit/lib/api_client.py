@@ -187,7 +187,7 @@ class PantryAPI:
         r.raise_for_status()
         return r.json()
 
-    def recipes(self, cuisine: str | None = None, search: str | None = None, limit: int = 2000) -> list[dict]:
+    def recipes(self, cuisine: str | None = None, search: str | None = None, limit: int = 200) -> list[dict]:
         params: dict[str, str] = {"limit": str(max(1, min(int(limit), 5000)))}
         if cuisine:
             params["cuisine"] = cuisine
@@ -240,7 +240,7 @@ class PantryAPI:
             f"{self.base}/api/v1/recommendations/ai",
             headers=self._headers(),
             params={"limit": limit},
-            timeout=120.0,
+            timeout=45.0,
         )
         r.raise_for_status()
         return r.json()
