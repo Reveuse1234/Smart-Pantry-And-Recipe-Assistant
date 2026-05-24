@@ -13,7 +13,6 @@ import streamlit as st
 from lib.api_client import DEFAULT_BASE, PantryAPI
 from lib.auth_persist import clear_auth_token, persist_auth_token
 from lib.branding import APP_DISPLAY_NAME, APP_TAGLINE, app_icon_path
-from lib.public_url import render_browser_access_block
 from lib.dish_images import prefetch_urls_from_items, trusted_dish_image_url
 from lib.home_infinite_scroll import inject_home_infinite_scroll
 from lib.recipe_dedup import canonical_recipe_key, dedupe_feed_items
@@ -375,7 +374,6 @@ if st.session_state.token is None:
             st.image(str(_icon), width=120, use_container_width=False)
         st.markdown(f"# {APP_DISPLAY_NAME}")
         st.caption(APP_TAGLINE)
-        render_browser_access_block()
         st.markdown(
             '<div class="pf-card" style="text-align:center;">'
             "Sign in or create an account to manage ingredients, track calories, expiry alerts, "
@@ -484,8 +482,6 @@ else:
             placeholder="Search recipes by name (e.g. curry, pasta, soup)…",
             key="home_feed_search",
         )
-
-    render_browser_access_block()
 
     tok = st.session_state.token
     q = (st.session_state.get("home_feed_search") or "").strip()
