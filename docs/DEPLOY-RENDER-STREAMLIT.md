@@ -1,5 +1,15 @@
 # Deploy: Render (API) + Streamlit Cloud (UI)
 
+## Live URLs (this project)
+
+| Role | URL |
+|------|-----|
+| **App (share this)** | https://smart-pantry-and-recipe-assistant-c6jnsjedabfmbrga9afsbx.streamlit.app |
+| **API** | https://smart-pantry-and-recipe-assistant-1.onrender.com |
+| **API health check** | https://smart-pantry-and-recipe-assistant-1.onrender.com/health |
+
+Do **not** commit `PANTRY_SECRET` or `.env` — set those only in Render and Streamlit dashboards.
+
 ## What each URL is for
 
 | URL | What you see | Who uses it |
