@@ -1,0 +1,11 @@
+# Render Blueprint — API only. UI: Streamlit Community Cloud (frontend/streamlit/Home.py).
+services:
+  - type: web
+    name: smart-pantry-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
