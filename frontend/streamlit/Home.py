@@ -50,12 +50,25 @@ def _friendly_auth_error(err: Exception) -> str:
             "From the project folder run `python3 run_pantryflow.py` (starts the API and this app)."
         )
     if isinstance(err, httpx.HTTPStatusError):
+        code = err.response.status_code
+        if code == 404:
+            return (
+                f"The API at `{DEFAULT_BASE}` returned 404 (not found). "
+                "Your Render URL may have changed — update **`BACKEND_URL`** in Streamlit secrets "
+                "to the new `https://….onrender.com` URL, then reboot the app."
+            )
+        if code == 401:
+            return (
+                "Invalid email or password. "
+                "A **new Render deployment uses an empty database** — use **Create account** "
+                "instead of an old local password."
+            )
         detail = ""
         try:
             payload = err.response.json()
             detail = payload.get("detail") if isinstance(payload, dict) else ""
         except Exception:
-            detail = ""
+            detail = err.response.text[:200] if err.response.text else ""
         return str(detail or err)
     return str(err)
 
@@ -370,6 +383,10 @@ if st.session_state.token is None:
             "</div>",
             unsafe_allow_html=True,
         )
+        from urllib.parse import urlparse
+
+        _api_host = urlparse(DEFAULT_BASE).netloc or DEFAULT_BASE
+        st.caption(f"API: `{_api_host}` — first time on cloud? Use **Create account** (data does not carry over from your Mac).")
         tab1, tab2 = st.tabs(["Sign in", "Create account"])
         with tab1:
             with st.form("login"):

@@ -37,7 +37,8 @@ def register(body: UserCreate, db: Session = Depends(get_db)):
             raise HTTPException(400, "Invalid invite code")
         db.add(HouseholdMember(household_id=hh.id, user_id=user.id, role="member"))
     else:
-        hh = Household(name=body.household_name.strip() or "My Household", invite_code=new_invite_code())
+        hh_name = (body.household_name or "My Household").strip() or "My Household"
+        hh = Household(name=hh_name, invite_code=new_invite_code())
         db.add(hh)
         db.flush()
         db.add(HouseholdMember(household_id=hh.id, user_id=user.id, role="owner"))

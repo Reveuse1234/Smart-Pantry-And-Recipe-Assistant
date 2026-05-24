@@ -44,3 +44,12 @@ CORS_ORIGINS = "https://YOUR-APP.streamlit.app"
 ```
 
 3. Open the `.streamlit.app` URL on phone/laptop.
+
+## Sign-in problems
+
+| Symptom | Fix |
+|---------|-----|
+| “Cannot reach the API” / timeout | Set `BACKEND_URL` to your **current** Render URL; open `…/health` in a browser until you see `{"status":"ok"}`. |
+| “404 (not found)” on sign-in | Old Render URL in secrets — copy the new URL from Render → **Settings** → copy service URL. **Reboot** Streamlit. |
+| “Invalid credentials” with your usual password | Cloud DB is **new and empty**. Use **Create account** (same email is fine if not taken). |
+| Logged in briefly then kicked out | `PANTRY_SECRET` must match on Render and Streamlit exactly. |

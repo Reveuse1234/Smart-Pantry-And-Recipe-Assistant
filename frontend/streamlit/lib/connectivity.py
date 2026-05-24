@@ -65,6 +65,8 @@ def _backend_health_probe() -> tuple[bool, str]:
             r = httpx.get(f"{base}/health", timeout=timeout)
             if r.status_code == 200:
                 return True, base
+            if r.status_code == 404:
+                return False, f"{base} returned 404 — wrong URL or deleted Render service; update BACKEND_URL"
             if r.status_code == 503:
                 return False, f"{base} is running but database check failed (503)"
         except httpx.RequestError as e:
