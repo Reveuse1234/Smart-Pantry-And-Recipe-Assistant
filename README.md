@@ -96,6 +96,11 @@ Environment:
 - **Open Food Facts** — used when adding pantry items from a barcode (`POST /api/v1/pantry/from-openfoodfacts`).
 - **CSV** — `POST /api/v1/imports/recipes-csv` (Kaggle-style columns documented in `backend/app/services/kaggle_loader.py`).
 
-## Legacy note
 
-The old monolithic `app/main.py` (Jinja + session cookies) and `streamlit_app/` that imported the ORM directly have been removed in favor of this split. Use the backend API as the single source of truth.
+
+
+
+
+
+
+
