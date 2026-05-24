@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import html
+from typing import Optional
 
 import httpx
 import streamlit as st
@@ -277,25 +278,45 @@ def _home_feed_pool(token: str) -> list[dict]:
     return _merge_catalog_into_feed(head, catalog if isinstance(catalog, list) else [])
 
 
-def _render_recipe_feed_grid(items: list[dict], *, key_prefix: str) -> None:
+def _render_recipe_feed_grid(
+    items: list[dict],
+    *,
+    key_prefix: str,
+    require_image: bool = True,
+    empty_message: Optional[str] = None,
+) -> None:
     if not items:
-        st.info("Nothing here yet. Open **Recipes** from the sidebar or add pantry items for picks.")
+        st.info(
+            empty_message
+            or "Nothing here yet. Open **Recipes** from the sidebar or add pantry items for picks."
+        )
         return
     image_cache = prefetch_urls_from_items(items)
     st.markdown('<div class="pf-insta-feed">', unsafe_allow_html=True)
+    shown = 0
     for i, it in enumerate(items):
         name = html.escape(str(it.get("name") or "Recipe"))
         cuisine = html.escape(str(it.get("cuisine") or ""))
         subtitle = html.escape(str(it.get("subtitle") or ""))
         photo_url = trusted_dish_image_url(str(it.get("image_url") or ""))
-        if not photo_url:
+        if not photo_url and require_image:
             continue
+        shown += 1
         st.markdown('<article class="pf-insta-post">', unsafe_allow_html=True)
-        if photo_url in image_cache:
+        if photo_url and photo_url in image_cache:
             st.image(image_cache[photo_url], width="stretch")
-        else:
+        elif photo_url:
             st.markdown(
                 f'<img src="{html.escape(photo_url)}" alt="{name}" loading="lazy" />',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f'<div class="pf-insta-ph" style="padding:2.5rem 1rem;text-align:center;'
+                f'background:#f8fafc;color:#64748b;min-height:120px;">'
+                f"<strong>{name}</strong><br/>"
+                f'<span style="font-size:0.85rem;">No photo — open recipe for details</span>'
+                f"</div>",
                 unsafe_allow_html=True,
             )
         st.markdown(
@@ -314,6 +335,11 @@ def _render_recipe_feed_grid(items: list[dict], *, key_prefix: str) -> None:
             st.switch_page("pages/03_Recipes_AI.py")
         st.markdown("</article>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+    if require_image and shown == 0 and items:
+        st.info(
+            empty_message
+            or "Matches were found but none have a verified photo yet. Try **Recipes** in the sidebar for the full list."
+        )
 
 
 if st.session_state.token:
@@ -411,11 +437,11 @@ else:
 
     c_brand, c_search = st.columns([1.7, 1.7], gap="medium")
     with c_brand:
-        logo_col, text_col = st.columns([0.28, 0.72], gap="small")
+        logo_col, text_col = st.columns([0.24, 0.76], gap="small")
         with logo_col:
             hi = app_icon_path()
             if hi is not None:
-                st.image(str(hi), width=116)
+                st.image(str(hi), width=96)
         with text_col:
             st.markdown(
                 f'<div class="pf-home-brand">'
@@ -436,6 +462,30 @@ else:
     render_browser_access_block()
 
     tok = st.session_state.token
+    q = (st.session_state.get("home_feed_search") or "").strip()
+
+    if len(q) >= 2:
+        st.markdown(
+            f'<div class="pf-home-feed-section">'
+            f'<p class="pf-feed-heading">Search results · “{html.escape(q)}”</p>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        try:
+            hits = _home_recipe_search(tok, q)
+            search_items = _dedupe_feed_cards(_feed_cards_from_recipe_rows(hits))
+            _render_recipe_feed_grid(
+                search_items,
+                key_prefix="hf_srch",
+                require_image=False,
+                empty_message=f'No recipes found matching “{html.escape(q)}”. Try another name or open **Recipes** in the sidebar.',
+            )
+        except Exception as e:
+            st.error(f"Search failed: {e}")
+        st.divider()
+    elif len(q) == 1:
+        st.caption("Type at least 2 characters to search recipes by name.")
+
     if st.session_state.get("home_feed_pool_token") != tok:
         st.session_state.home_feed_pool_token = tok
         st.session_state.home_feed_visible = HOME_FEED_PAGE_SIZE
@@ -447,32 +497,23 @@ else:
     visible_n = min(int(st.session_state.home_feed_visible), len(pool))
     rec_items = pool[:visible_n]
 
-    st.markdown(
-        '<div class="pf-home-feed-section">'
-        '<p class="pf-feed-heading">Recommended recipes</p>'
-        "</div>",
-        unsafe_allow_html=True,
-    )
-    _render_recipe_feed_grid(rec_items, key_prefix="hf_rec")
-
-    if visible_n < len(pool):
-        st.markdown('<div id="home-feed-sentinel"></div>', unsafe_allow_html=True)
-        if st.button("Load more recipes", key="home_feed_load_more", use_container_width=True):
-            st.session_state.home_feed_visible = min(
-                len(pool),
-                int(st.session_state.home_feed_visible) + HOME_FEED_PAGE_SIZE,
-            )
-            st.rerun()
-        inject_home_infinite_scroll()
-    elif pool:
-        st.caption("You have reached the end of the feed.")
-
-    q = (st.session_state.get("home_feed_search") or "").strip()
-    if len(q) >= 2:
+    if len(q) < 2:
         st.markdown(
-            f'<p class="pf-feed-heading">Search results · “{html.escape(q)}”</p>',
+            '<div class="pf-home-feed-section">'
+            '<p class="pf-feed-heading">Recommended recipes</p>'
+            "</div>",
             unsafe_allow_html=True,
         )
-        hits = _home_recipe_search(tok, q)
-        search_items = _feed_cards_with_images(_dedupe_feed_cards(_feed_cards_from_recipe_rows(hits)))
-        _render_recipe_feed_grid(search_items, key_prefix="hf_srch")
+        _render_recipe_feed_grid(rec_items, key_prefix="hf_rec")
+
+        if visible_n < len(pool):
+            st.markdown('<div id="home-feed-sentinel"></div>', unsafe_allow_html=True)
+            if st.button("Load more recipes", key="home_feed_load_more", use_container_width=True):
+                st.session_state.home_feed_visible = min(
+                    len(pool),
+                    int(st.session_state.home_feed_visible) + HOME_FEED_PAGE_SIZE,
+                )
+                st.rerun()
+            inject_home_infinite_scroll()
+        elif pool:
+            st.caption("You have reached the end of the feed.")

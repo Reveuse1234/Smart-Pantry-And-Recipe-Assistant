@@ -1,19 +1,14 @@
-# App data & secrets
 data/*.db
 data/pantry.db
-.env
+.DS_Store
 .hf_cache/
 .streamlit/secrets.toml
-
-# Python
-.DS_Store
+.env
 __pycache__/
 .pycache/
 .pycache_check/
 *.pyc
 .venv/
 venv/
-
-# User uploads (keep folder)
 static/uploads/*
 !static/uploads/.gitkeep
