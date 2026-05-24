@@ -381,10 +381,6 @@ if st.session_state.token is None:
             "</div>",
             unsafe_allow_html=True,
         )
-        from urllib.parse import urlparse
-
-        _api_host = urlparse(DEFAULT_BASE).netloc or DEFAULT_BASE
-        st.caption(f"API: `{_api_host}` — first time on cloud? Use **Create account** (data does not carry over from your Mac).")
         tab1, tab2 = st.tabs(["Sign in", "Create account"])
         with tab1:
             with st.form("login"):
