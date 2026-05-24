@@ -222,13 +222,3 @@ def sidebar_nav(current: str):
                 st.markdown(f"**{label}**")
             else:
                 st.page_link(path, label=label)
-        try:
-            from lib.public_url import get_public_app_url, is_loopback_public_url
-
-            _share = get_public_app_url()
-            if _share and not is_loopback_public_url(_share):
-                st.divider()
-                st.caption("App link (any browser)")
-                st.code(_share, language=None)
-        except Exception:
-            pass
