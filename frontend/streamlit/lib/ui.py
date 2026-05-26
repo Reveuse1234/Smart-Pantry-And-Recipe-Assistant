@@ -222,3 +222,6 @@ def sidebar_nav(current: str):
                 st.markdown(f"**{label}**")
             else:
                 st.page_link(path, label=label)
+        from lib.contributors import render_sidebar_contributors
+
+        render_sidebar_contributors()
