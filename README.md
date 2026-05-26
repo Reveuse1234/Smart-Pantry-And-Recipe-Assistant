@@ -7,6 +7,8 @@
 | **Open the app** | https://smart-pantry-and-recipe-assistant-c6jnsjedabfmbrga9afsbx.streamlit.app |
 | **API (health)** | https://smart-pantry-and-recipe-assistant-1.onrender.com/health |
 
+On **Streamlit free tier**, the app may show a **“Zzzz / gone to sleep”** page after inactivity — tap **“Yes, get this app back up!”** and wait ~1 minute. See [docs/DEPLOY-RENDER-STREAMLIT.md](docs/DEPLOY-RENDER-STREAMLIT.md).
+
 Deploy notes: [docs/DEPLOY-RENDER-STREAMLIT.md](docs/DEPLOY-RENDER-STREAMLIT.md)
 
 ## Layout

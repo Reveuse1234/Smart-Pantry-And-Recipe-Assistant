@@ -55,6 +55,28 @@ CORS_ORIGINS = "https://YOUR-APP.streamlit.app"
 
 3. Open the `.streamlit.app` URL on phone/laptop.
 
+## “Zzzz” / sleeping app on phone (Streamlit free tier)
+
+If mobile Safari shows **“This app has gone to sleep due to inactivity”** on `sbx.streamlit.app`, that is **Streamlit Cloud**, not a bug in Smart Pantry. Free apps **hibernate** when nobody has used them for a while.
+
+**What to do each time:**
+
+1. Tap **“Yes, get this app back up!”**
+2. Wait **30–90 seconds** (first load wakes the server).
+3. You should land on the real app at  
+   `https://smart-pantry-and-recipe-assistant-c6jnsjedabfmbrga9afsbx.streamlit.app`
+
+Bookmark that **full** `.streamlit.app` link (not only `sbx.streamlit.app`).
+
+**Reduce how often it sleeps (optional, free):**
+
+- [UptimeRobot](https://uptimerobot.com) (or similar): HTTP monitor every **5–10 minutes** on your Streamlit URL. Occasional pings keep the app warmer.
+- This repo includes `.github/workflows/keep-streamlit-awake.yml` — a scheduled GitHub Action that pings the app every 30 minutes (enable by pushing to GitHub; uses Actions minutes).
+
+**Only way to remove the sleep screen completely:** Streamlit Cloud **paid** plan, or host the UI elsewhere.
+
+Render’s API also sleeps on free tier; the first sign-in after idle may be slow until `…/health` returns OK.
+
 ## Sign-in problems
 
 | Symptom | Fix |
