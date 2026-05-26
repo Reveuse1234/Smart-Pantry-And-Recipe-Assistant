@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Install local git hooks that strip Cursor co-author trailers before each commit.
+# Install local git hooks that strip unwanted automated co-author trailers before each commit.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOOK="$ROOT/.git/hooks/prepare-commit-msg"
 cat > "$HOOK" << 'EOF'
 #!/bin/bash
-# Remove Cursor attribution from commit messages (Cursor injects this automatically).
+# Remove automated co-author trailers from commit messages.
 MSG_FILE="$1"
 if [[ -f "$MSG_FILE" ]]; then
   if [[ "$(uname -s)" == "Darwin" ]]; then
