@@ -16,7 +16,6 @@ from lib.branding import APP_DISPLAY_NAME, APP_TAGLINE, app_icon_path
 from lib.dish_images import prefetch_urls_from_items, trusted_dish_image_url
 from lib.home_infinite_scroll import inject_home_infinite_scroll
 from lib.recipe_dedup import canonical_recipe_key, dedupe_feed_items
-from lib.contributors import render_contributors_badge
 from lib.ui import inject_pastel_theme, sidebar_nav
 
 HOME_FEED_PAGE_SIZE = 12
@@ -447,7 +446,6 @@ if st.session_state.token is None:
                             st.warning(_friendly_auth_error(e))
                         except Exception as e:
                             st.error(f"Registration failed: {_friendly_auth_error(e)}")
-    render_contributors_badge(fixed=True)
 else:
     try:
         api = PantryAPI(token=st.session_state.token)
