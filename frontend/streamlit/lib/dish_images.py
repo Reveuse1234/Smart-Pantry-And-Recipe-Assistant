@@ -15,12 +15,17 @@ _TRUSTED = (
     "upload.wikimedia.org",
 )
 
+# Wrong Wikimedia matches (e.g. person photo for dish name "Haak").
+_BLOCKED_FRAGMENTS = ("alar_haak",)
+
 
 def trusted_dish_image_url(url: str | None) -> str | None:
     u = (url or "").strip()
     if not u.lower().startswith("https://"):
         return None
     low = u.lower()
+    if any(frag in low for frag in _BLOCKED_FRAGMENTS):
+        return None
     if "images.unsplash.com" in low:
         return None
     if any(host in low for host in _TRUSTED):

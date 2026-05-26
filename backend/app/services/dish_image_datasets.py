@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Recipe
 from app.services.recipe_image_match import norm_recipe_name, name_similarity
-from app.services.recipe_image_urls import is_placeholder_image_url, is_trusted_dish_image_url
+from app.services.recipe_image_urls import is_placeholder_image_url, is_trusted_dish_image_url, is_blocked_dish_image_url
 
 logger = logging.getLogger(__name__)
 
@@ -145,15 +145,15 @@ def lookup_dish_image(name: str, cuisine: str | None = None) -> str | None:
         return None
     idx = _merged_index()
     exact = (idx.get("by_exact") or {}).get(_exact_key(name, cuisine))
-    if exact:
+    if exact and not is_blocked_dish_image_url(exact):
         return exact
     by_name: dict[str, str] = idx.get("by_name") or {}
-    if key in by_name:
+    if key in by_name and not is_blocked_dish_image_url(by_name[key]):
         return by_name[key]
 
     cuisine_key = (cuisine or "").strip()
     bucket: dict[str, str] = (idx.get("by_cuisine") or {}).get(cuisine_key, {})
-    if key in bucket:
+    if key in bucket and not is_blocked_dish_image_url(bucket[key]):
         return bucket[key]
     return None
 

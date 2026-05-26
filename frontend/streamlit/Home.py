@@ -13,7 +13,7 @@ import streamlit as st
 from lib.api_client import DEFAULT_BASE, PantryAPI
 from lib.auth_persist import clear_auth_token, persist_auth_token
 from lib.branding import APP_DISPLAY_NAME, APP_TAGLINE, app_icon_path
-from lib.dish_images import prefetch_urls_from_items, trusted_dish_image_url
+from lib.dish_images import NO_DISH_IMAGE_MESSAGE, prefetch_urls_from_items, trusted_dish_image_url
 from lib.home_infinite_scroll import inject_home_infinite_scroll
 from lib.recipe_dedup import canonical_recipe_key, dedupe_feed_items
 from lib.ui import inject_pastel_theme, sidebar_nav
@@ -183,17 +183,6 @@ def _dedupe_feed_cards(items: list[dict]) -> list[dict]:
     return dedupe_feed_items(items)
 
 
-def _feed_cards_with_images(items: list[dict]) -> list[dict]:
-    """Home feed only shows recipes that have a verified dish photo."""
-    out: list[dict] = []
-    for it in items:
-        if not isinstance(it, dict):
-            continue
-        if trusted_dish_image_url(str(it.get("image_url") or "")):
-            out.append(it)
-    return out
-
-
 def _feed_cards_from_recommendations(ai: list, rules: list) -> list[dict]:
     seen_id: set[int] = set()
     seen_title: set[str] = set()
@@ -280,7 +269,7 @@ def _feed_cards_from_recipe_rows(rows: list[dict]) -> list[dict]:
 
 
 def _merge_catalog_into_feed(primary: list[dict], catalog_rows: list[dict]) -> list[dict]:
-    """Recommendations first, then remaining catalog recipes that have photos."""
+    """Recommendations first, then remaining catalog recipes."""
     out = list(primary)
     seen_ids = {int(x["recipe_id"]) for x in out}
     seen_keys = {canonical_recipe_key(str(x.get("name") or ""), str(x.get("cuisine") or "")) for x in out}
@@ -288,8 +277,6 @@ def _merge_catalog_into_feed(primary: list[dict], catalog_rows: list[dict]) -> l
         rid = int(card["recipe_id"])
         ckey = canonical_recipe_key(str(card.get("name") or ""), str(card.get("cuisine") or ""))
         if rid in seen_ids or ckey in seen_keys:
-            continue
-        if not trusted_dish_image_url(str(card.get("image_url") or "")):
             continue
         seen_ids.add(rid)
         seen_keys.add(ckey)
@@ -302,7 +289,7 @@ def _home_feed_pool(token: str) -> list[dict]:
     """Full home feed: personalized picks first, then catalog recipes with verified photos."""
     api = PantryAPI(token=token)
     ai, rules = _home_reco_bundle(token)
-    head = _feed_cards_with_images(_dedupe_feed_cards(_feed_cards_from_recommendations(ai, rules)))
+    head = _dedupe_feed_cards(_feed_cards_from_recommendations(ai, rules))
     try:
         catalog = api.recipes(limit=120)
     except Exception:
@@ -314,7 +301,7 @@ def _render_recipe_feed_grid(
     items: list[dict],
     *,
     key_prefix: str,
-    require_image: bool = True,
+    require_image: bool = False,
     empty_message: Optional[str] = None,
 ) -> None:
     if not items:
@@ -347,7 +334,7 @@ def _render_recipe_feed_grid(
                 f'<div class="pf-insta-ph" style="padding:2.5rem 1rem;text-align:center;'
                 f'background:#f8fafc;color:#64748b;min-height:120px;">'
                 f"<strong>{name}</strong><br/>"
-                f'<span style="font-size:0.85rem;">No photo — open recipe for details</span>'
+                f'<span style="font-size:0.85rem;">{html.escape(NO_DISH_IMAGE_MESSAGE)}</span>'
                 f"</div>",
                 unsafe_allow_html=True,
             )

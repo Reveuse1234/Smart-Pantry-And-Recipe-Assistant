@@ -20,6 +20,7 @@ from app.services.recipe_engine import (
     score_recipe,
 )
 from app.services.dish_image_datasets import resolve_stored_or_dataset_image
+from app.services.recipe_image_urls import public_dish_image_url
 from app.services.recipe_dedup import dedupe_recipe_dicts
 from app.services.tfidf_engine import build_recipe_index
 
@@ -77,10 +78,12 @@ def _recommendation_dict(
         "recipe_id": recipe.id,
         "name": recipe.name,
         "cuisine": recipe.cuisine,
-        "image_url": resolve_stored_or_dataset_image(
-            getattr(recipe, "image_url", None),
-            name=recipe.name,
-            cuisine=recipe.cuisine,
+        "image_url": public_dish_image_url(
+            resolve_stored_or_dataset_image(
+                getattr(recipe, "image_url", None),
+                name=recipe.name,
+                cuisine=recipe.cuisine,
+            )
         ),
         "ingredient_match_score": round(float(match_sc), 4),
         "ai_score": ai_score,

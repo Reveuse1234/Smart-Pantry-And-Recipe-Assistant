@@ -25,12 +25,34 @@ _TRUSTED_HOST_FRAGMENTS: tuple[str, ...] = (
     "commons.wikimedia.org",
 )
 
+# Known wrong matches (e.g. person photos matched by dish name).
+_BLOCKED_IMAGE_FRAGMENTS: tuple[str, ...] = (
+    "alar_haak",
+)
+
+
+def is_blocked_dish_image_url(value: str | None) -> bool:
+    v = (value or "").strip().lower()
+    if not v:
+        return False
+    return any(frag in v for frag in _BLOCKED_IMAGE_FRAGMENTS)
+
 
 def is_trusted_dish_image_url(value: str | None) -> bool:
     v = (value or "").strip().lower()
     if not v.startswith("https://"):
         return False
+    if is_blocked_dish_image_url(v):
+        return False
     return any(host in v for host in _TRUSTED_HOST_FRAGMENTS)
+
+
+def public_dish_image_url(value: str | None) -> str:
+    """Return a dish photo URL for API/UI, or empty when missing or blocked."""
+    v = (value or "").strip()
+    if not v or is_blocked_dish_image_url(v):
+        return ""
+    return v if is_trusted_dish_image_url(v) else ""
 
 
 def is_placeholder_image_url(value: str | None) -> bool:
@@ -47,6 +69,8 @@ def is_placeholder_image_url(value: str | None) -> bool:
 def ensure_recipe_image_url(value: str | None) -> str:
     """Return stored URL when trusted; otherwise empty (clients skip generic stock art)."""
     v = (value or "").strip()
+    if is_blocked_dish_image_url(v):
+        return ""
     if is_trusted_dish_image_url(v):
         return v
     if v and not is_placeholder_image_url(v):

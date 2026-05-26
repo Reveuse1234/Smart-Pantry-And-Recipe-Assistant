@@ -27,6 +27,7 @@ from app.services.dish_image_datasets import (
     dataset_stats,
     resolve_stored_or_dataset_image,
 )
+from app.services.recipe_image_urls import public_dish_image_url
 from app.services.recipe_scaling import scale_ingredient_list
 from app.services.instruction_steps import steps_for_recipe
 from app.services.recipe_dedup import dedupe_recipe_orm
@@ -51,6 +52,7 @@ def _recipe_out_row(r: Recipe, *, resolve_images: bool = False) -> RecipeOut:
             ) or image_url
         except Exception:
             pass
+    image_url = public_dish_image_url(image_url)
     return RecipeOut(
         id=int(r.id),
         name=(r.name or "").strip() or "Untitled",
