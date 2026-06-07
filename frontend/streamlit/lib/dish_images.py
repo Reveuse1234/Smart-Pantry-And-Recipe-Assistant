@@ -15,8 +15,24 @@ _TRUSTED = (
     "upload.wikimedia.org",
 )
 
-# Wrong Wikimedia matches (e.g. person photo for dish name "Haak").
-_BLOCKED_FRAGMENTS = ("alar_haak",)
+# Wrong Wikimedia matches (person photos, UI assets, video frames).
+_BLOCKED_FRAGMENTS = (
+    "alar_haak",
+    "haak%2c_fred",
+    "haak,_fred",
+    "rista_marjan",
+    "rista_tele",
+    "tele%C4%8Dki",
+    "marjanovic",
+    "marjanović",
+    "videoframe",
+    "fileicon",
+    "file-type-icons",
+    "emma_kaliya",
+    "/w/resources/assets/",
+    "-dpla-",
+    "_dpla_",
+)
 
 
 def trusted_dish_image_url(url: str | None) -> str | None:
@@ -28,6 +44,9 @@ def trusted_dish_image_url(url: str | None) -> str | None:
         return None
     if "images.unsplash.com" in low:
         return None
+    if "upload.wikimedia.org" in low or "commons.wikimedia.org" in low:
+        if "/wikipedia/commons/" not in low:
+            return None
     if any(host in low for host in _TRUSTED):
         return u
     return None

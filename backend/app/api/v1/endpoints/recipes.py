@@ -25,6 +25,7 @@ from app.services.dish_image_datasets import (
     backfill_recipe_images,
     backfill_recipe_images_online,
     dataset_stats,
+    lookup_dish_image,
     resolve_stored_or_dataset_image,
 )
 from app.services.recipe_image_urls import public_dish_image_url
@@ -42,17 +43,18 @@ def _recipe_out_row(r: Recipe, *, resolve_images: bool = False) -> RecipeOut:
 
     List endpoints skip per-row image lookup for speed; detail views resolve images.
     """
-    image_url = (getattr(r, "image_url", None) or "") or ""
-    if resolve_images:
+    image_url = public_dish_image_url(lookup_dish_image(r.name or "", r.cuisine) or "")
+    if resolve_images and not image_url:
         try:
-            image_url = resolve_stored_or_dataset_image(
-                getattr(r, "image_url", None),
-                name=r.name or "",
-                cuisine=r.cuisine,
-            ) or image_url
+            image_url = public_dish_image_url(
+                resolve_stored_or_dataset_image(
+                    getattr(r, "image_url", None),
+                    name=r.name or "",
+                    cuisine=r.cuisine,
+                )
+            )
         except Exception:
             pass
-    image_url = public_dish_image_url(image_url)
     return RecipeOut(
         id=int(r.id),
         name=(r.name or "").strip() or "Untitled",

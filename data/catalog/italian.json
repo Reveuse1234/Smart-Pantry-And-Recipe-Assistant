@@ -61,7 +61,8 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Risotto_ai_funghi_porcini.JPG/960px-Risotto_ai_funghi_porcini.JPG"
   },
   {
     "name": "Ossobuco Milanese",
@@ -93,7 +94,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/wwuqvt1487345467.jpg"
   },
   {
     "name": "Margherita Pizza",
@@ -124,7 +126,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Margherita_pizza_on_plate.jpg/960px-Margherita_pizza_on_plate.jpg"
   },
   {
     "name": "Minestrone",
@@ -156,7 +159,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Minestrone_soup.jpg/960px-Minestrone_soup.jpg"
   },
   {
     "name": "Saltimbocca alla Romana",
@@ -188,7 +192,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Saltimbocca_alla_Romana.jpg/960px-Saltimbocca_alla_Romana.jpg"
   },
   {
     "name": "Cacio e Pepe",
@@ -219,7 +224,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Cacio_e_pepe.jpg/960px-Cacio_e_pepe.jpg"
   },
   {
     "name": "Eggplant Parmigiana",
@@ -251,7 +257,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Eggplant_parmigiana.jpg/960px-Eggplant_parmigiana.jpg"
   },
   {
     "name": "Panna Cotta",
@@ -283,7 +290,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Panna_cotta_2_%28fcm%29.JPG/960px-Panna_cotta_2_%28fcm%29.JPG"
   },
   {
     "name": "Arancini",
@@ -314,7 +322,8 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Arancini_002.jpg/960px-Arancini_002.jpg"
   },
   {
     "name": "Pesto Genovese Pasta",
@@ -378,6 +387,7 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/xrrwpx1487347049.jpg"
   }
 ]

@@ -19,10 +19,10 @@ from app.services.recipe_image_urls import is_placeholder_image_url, is_trusted_
 logger = logging.getLogger(__name__)
 
 _DATASET_FILES: tuple[str, ...] = (
-    "curated_dish_images.json",
     "dish_images_exact.json",
     "dish_images_themealdb.json",
     "dish_images_catalog.json",
+    "curated_dish_images.json",
 )
 
 _STRICT_FUZZY_CUTOFF = 0.78
@@ -83,7 +83,7 @@ def _catalog_name_images() -> dict[str, str]:
                 continue
             name = str(row.get("name") or "").strip()
             url = str(row.get("image_url") or "").strip()
-            if name and url and is_trusted_dish_image_url(url):
+            if name and url and is_trusted_dish_image_url(url) and not is_blocked_dish_image_url(url):
                 out[_exact_key(name, cuisine)] = url
     return out
 
@@ -111,11 +111,11 @@ def _merged_index() -> dict[str, Any]:
         sources.append(src)
         for k, v in (payload.get("by_exact") or {}).items():
             url = str(v or "").strip()
-            if url and is_trusted_dish_image_url(url):
+            if url and is_trusted_dish_image_url(url) and not is_blocked_dish_image_url(url):
                 by_exact[str(k)] = url
         for k, v in (payload.get("by_name") or {}).items():
             url = str(v or "").strip()
-            if url and is_trusted_dish_image_url(url):
+            if url and is_trusted_dish_image_url(url) and not is_blocked_dish_image_url(url):
                 by_name[norm_recipe_name(str(k))] = url
         for cuisine, bucket in (payload.get("by_cuisine") or {}).items():
             if not isinstance(bucket, dict):
@@ -124,10 +124,14 @@ def _merged_index() -> dict[str, Any]:
             by_cuisine.setdefault(cu, {})
             for k, v in bucket.items():
                 url = str(v or "").strip()
-                if url and is_trusted_dish_image_url(url):
+                if url and is_trusted_dish_image_url(url) and not is_blocked_dish_image_url(url):
                     by_cuisine[cu][norm_recipe_name(str(k))] = url
 
-    # Catalog JSON may contain outdated URLs; only verified dataset keys are merged above.
+    # Verified catalog JSON rows override bundled datasets.
+    for key, url in _catalog_name_images().items():
+        if url and not is_blocked_dish_image_url(url):
+            by_exact[key] = url
+
     return {
         "by_exact": by_exact,
         "by_name": by_name,

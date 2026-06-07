@@ -87,7 +87,16 @@ def wikimedia_thumb_for_recipe(recipe_name: str, cuisine: str | None = None) -> 
             nn, nl = name.lower(), label.lower()
             title_prefix = nl.startswith(nn) or nl.startswith(f"{nn} ")
             # Skip portraits, documents, and other non-food files.
-            if re.search(r"\b(19|20)\d{2}\b", label) or re.search(r"\b(d\.|born|portrait|logo)\b", label, re.I):
+            if re.search(r"\b(19|20)\d{2}\b", label) or re.search(
+                r"\b(d\.|born|portrait|logo|ingredients\.|videoframe)\b", label, re.I
+            ):
+                continue
+            if re.search(r"\b(marjanovic|marjanović)\b", label, re.I):
+                continue
+            # Skip archival portraits (e.g. "Haak, Fredrick - Age … - DPLA").
+            if re.search(r",\s*[A-Z][a-z]+", label) or re.search(r"\bdpla\b", label, re.I):
+                continue
+            if re.search(r"\btele[cč]ki\b", label, re.I):
                 continue
             if not title_prefix and not is_acceptable_match(name, label, min_score=0.72):
                 continue

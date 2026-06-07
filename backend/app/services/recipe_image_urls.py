@@ -25,9 +25,23 @@ _TRUSTED_HOST_FRAGMENTS: tuple[str, ...] = (
     "commons.wikimedia.org",
 )
 
-# Known wrong matches (e.g. person photos matched by dish name).
+# Known wrong matches (person photos, UI assets, video frames, etc.).
 _BLOCKED_IMAGE_FRAGMENTS: tuple[str, ...] = (
     "alar_haak",
+    "haak%2c_fred",
+    "haak,_fred",
+    "rista_marjan",
+    "rista_tele",
+    "tele%C4%8Dki",
+    "marjanovic",
+    "marjanović",
+    "videoframe",
+    "fileicon",
+    "file-type-icons",
+    "emma_kaliya",
+    "/w/resources/assets/",
+    "-dpla-",
+    "_dpla_",
 )
 
 
@@ -44,6 +58,9 @@ def is_trusted_dish_image_url(value: str | None) -> bool:
         return False
     if is_blocked_dish_image_url(v):
         return False
+    if "upload.wikimedia.org" in v or "commons.wikimedia.org" in v:
+        if "/wikipedia/commons/" not in v:
+            return False
     return any(host in v for host in _TRUSTED_HOST_FRAGMENTS)
 
 

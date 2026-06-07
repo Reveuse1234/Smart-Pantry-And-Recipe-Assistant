@@ -28,7 +28,8 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/1525872624.jpg"
   },
   {
     "name": "Mapo Tofu",
@@ -59,7 +60,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/1525874812.jpg"
   },
   {
     "name": "Char Siu Pork",
@@ -90,7 +92,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Char_siu_pork_on_green_peas_and_dinosaur_pasta%2C_with_antipasto%2C_soy_sauce%2C_and_olive_oil_-_Massachusetts.jpg/960px-Char_siu_pork_on_green_peas_and_dinosaur_pasta%2C_with_antipasto%2C_soy_sauce%2C_and_olive_oil_-_Massachusetts.jpg"
   },
   {
     "name": "Hot and Sour Soup",
@@ -123,7 +126,8 @@
     ],
     "health_notes": [
       "low-carb"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/1529445893.jpg"
   },
   {
     "name": "Xiao Long Bao",
@@ -154,7 +158,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Xiao_long_bao_3.jpg/960px-Xiao_long_bao_3.jpg"
   },
   {
     "name": "Chow Mein",
@@ -185,7 +190,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Chow_Mein_1.jpg/960px-Chow_Mein_1.jpg"
   },
   {
     "name": "Congee",
@@ -217,7 +223,8 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/A_BOWL_OF_FOXTAIL_MILLET_CONGEE.jpg/960px-A_BOWL_OF_FOXTAIL_MILLET_CONGEE.jpg"
   },
   {
     "name": "Twice-Cooked Pork",
@@ -248,7 +255,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Twice-cooked_Pork_%E5%9B%9E%E9%94%85%E8%82%89_%281648213963%29.jpg/960px-Twice-cooked_Pork_%E5%9B%9E%E9%94%85%E8%82%89_%281648213963%29.jpg"
   },
   {
     "name": "Ma Po Eggplant",
@@ -281,7 +289,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/1525874812.jpg"
   },
   {
     "name": "Scallion Pancakes",
@@ -346,7 +355,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/CHILEAN_SEA_BASS_with_SUKI_SAUCE_%28Spicy%29_Steamed_sea_bass_topped_with_our_special_spicy_chili_sauce._Served_on_top_of_steamed_vegetables.jpg/960px-CHILEAN_SEA_BASS_with_SUKI_SAUCE_%28Spicy%29_Steamed_sea_bass_topped_with_our_special_spicy_chili_sauce._Served_on_top_of_steamed_vegetables.jpg"
   },
   {
     "name": "Egg Fried Rice",
@@ -378,6 +388,7 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/wuyd2h1765655837.jpg"
   }
 ]

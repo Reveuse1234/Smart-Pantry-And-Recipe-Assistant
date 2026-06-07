@@ -30,7 +30,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/u5e9qq1763795441.jpg"
   },
   {
     "name": "Hummus",
@@ -63,7 +64,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/gpon5u1763801180.jpg"
   },
   {
     "name": "Shawarma Plate",
@@ -94,7 +96,8 @@
     ],
     "health_notes": [
       "diabetes-friendly"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Plate_shawarma.jpg/960px-Plate_shawarma.jpg"
   },
   {
     "name": "Kibbeh",
@@ -125,7 +128,8 @@
     ],
     "health_notes": [
       "heart-healthy"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Kibbeh3.jpg/960px-Kibbeh3.jpg"
   },
   {
     "name": "Fattoush",
@@ -157,7 +161,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Fattoush.JPG/960px-Fattoush.JPG"
   },
   {
     "name": "Mujadara",
@@ -190,7 +195,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Baba_ghannouj%2C_mujadara%2C_hoummos%2C_and_tabbouleh_-_Cambridge%2C_MA.jpg/960px-Baba_ghannouj%2C_mujadara%2C_hoummos%2C_and_tabbouleh_-_Cambridge%2C_MA.jpg"
   },
   {
     "name": "Baba Ganoush",
@@ -289,7 +295,8 @@
     ],
     "health_notes": [
       "high-protein"
-    ]
+    ],
+    "image_url": "https://www.themealdb.com/images/media/meals/g373701551450225.jpg"
   },
   {
     "name": "Grilled Kofta",
@@ -354,7 +361,8 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Beef_shawarma_and_tabbouleh%2C_Qantas%2C_2024_%2801%29.jpg/960px-Beef_shawarma_and_tabbouleh%2C_Qantas%2C_2024_%2801%29.jpg"
   },
   {
     "name": "Harira Soup",
@@ -387,6 +395,7 @@
     ],
     "health_notes": [
       "high-fiber"
-    ]
+    ],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Liat_Portal_for_Foodie_Disorder_-_Harira_soup.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Harira_soup.jpg"
   }
 ]

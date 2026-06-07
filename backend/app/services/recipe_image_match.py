@@ -98,24 +98,30 @@ def pick_best_meal_thumb(
 _INDIAN_ALIASES: dict[str, tuple[str, ...]] = {
     "chana masala": ("chana masala", "chole masala", "chickpea curry"),
     "butter chicken": ("butter chicken", "murgh makhani", "chicken makhani"),
-    "dal makhani": ("dal makhani", "maa ki dal"),
+    "dal makhani": ("dal makhani", "daa makhani", "maa ki dal"),
     "palak paneer": ("palak paneer", "saag paneer"),
-    "hyderabadi biryani": ("hyderabadi biryani", "chicken biryani"),
+    "hyderabadi biryani": ("hyderabadi biryani", "chicken biryani", "lamb biryani"),
     "chicken tikka wrap": ("chicken tikka", "tikka wrap"),
     "baingan bharta": ("baingan bharta", "baingan ka bharta"),
     "bhindi masala": ("bhindi masala", "okra masala", "bhindi curry"),
     "paneer tikka": ("paneer tikka",),
     "masala dosa": ("masala dosa",),
-    "malai kofta": ("malai kofta",),
-    "shahi paneer": ("shahi paneer",),
-    "khichdi": ("khichdi", "khichri"),
+    "malai kofta": ("malai kofta", "malai kofta curry"),
+    "shahi paneer": ("shahi paneer", "paneer shahi"),
+    "khichdi": ("khichdi", "khichri", "moong dal khichdi"),
     "upma": ("upma",),
     "vegetable biryani": ("vegetable biryani", "veg biryani"),
     "chicken chettinad": ("chicken chettinad", "chettinad chicken"),
-    "kadhi pakora": ("kadhi pakora", "kadhi"),
-    "methi matar malai": ("methi matar malai",),
-    "tandoori cauliflower": ("tandoori cauliflower", "gobi tandoori"),
-    "rogan mushroom": ("mushroom curry", "mushroom masala"),
+    "kadhi pakora": ("kadhi pakora", "kadhi", "punjabi kadhi"),
+    "methi matar malai": ("methi matar malai", "methi matar"),
+    "tandoori cauliflower": ("tandoori cauliflower", "gobi tandoori", "cauliflower tikka"),
+    "rogan mushroom": ("mushroom curry", "mushroom masala", "mushroom rogan josh"),
+}
+
+_CHINESE_ALIASES: dict[str, tuple[str, ...]] = {
+    "ma po eggplant": ("mapo eggplant", "mapo tofu", "chinese eggplant"),
+    "ma po tofu": ("mapo tofu", "ma po tofu"),
+    "scallion pancakes": ("cong you bing", "scallion pancake"),
 }
 
 
@@ -147,6 +153,10 @@ def search_queries_for_recipe(name: str, cuisine: str | None) -> list[str]:
     if cu == "Indian":
         add(f"Indian {cleaned}")
         for alt in _INDIAN_ALIASES.get(norm_recipe_name(cleaned), ()):
+            add(alt)
+    if cu == "Chinese":
+        add(f"Chinese {cleaned}")
+        for alt in _CHINESE_ALIASES.get(norm_recipe_name(cleaned), ()):
             add(alt)
     tokens = [t for t in re.findall(r"[a-z0-9]+", cleaned.lower()) if len(t) >= 4]
     if len(tokens) >= 2:
