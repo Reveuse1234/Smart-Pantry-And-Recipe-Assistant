@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import html
+import random
 from typing import Optional
 
 import httpx
@@ -297,6 +298,39 @@ def _home_feed_pool(token: str) -> list[dict]:
     return _merge_catalog_into_feed(head, catalog if isinstance(catalog, list) else [])
 
 
+def _shuffle_feed_pool(pool: list[dict], seed: int) -> list[dict]:
+    out = list(pool)
+    random.Random(seed).shuffle(out)
+    return out
+
+
+def _refresh_home_feed_on_visit(token: str) -> None:
+    """New Home visit: fetch fresh picks and shuffle the feed order."""
+    if not st.session_state.pop("home_feed_needs_refresh", False):
+        return
+    _home_feed_pool.clear()
+    _home_reco_bundle.clear()
+    st.session_state.home_feed_shuffle_seed = random.randint(0, 2**31 - 1)
+    st.session_state.home_feed_visible = HOME_FEED_PAGE_SIZE
+    st.session_state.pop("home_feed_shuffled_pool", None)
+    st.session_state.home_feed_shuffled_token = token
+
+
+def _shuffled_home_feed_pool(token: str, pool: list[dict]) -> list[dict]:
+    seed = st.session_state.get("home_feed_shuffle_seed")
+    if seed is None:
+        st.session_state.home_feed_shuffle_seed = random.randint(0, 2**31 - 1)
+        seed = st.session_state.home_feed_shuffle_seed
+    if (
+        st.session_state.get("home_feed_shuffled_token") != token
+        or "home_feed_shuffled_pool" not in st.session_state
+    ):
+        st.session_state.home_feed_shuffled_pool = _shuffle_feed_pool(pool, int(seed))
+        st.session_state.home_feed_shuffled_token = token
+    shuffled = st.session_state.get("home_feed_shuffled_pool")
+    return shuffled if isinstance(shuffled, list) else pool
+
+
 def _render_recipe_feed_grid(
     items: list[dict],
     *,
@@ -504,12 +538,15 @@ else:
     if st.session_state.get("home_feed_pool_token") != tok:
         st.session_state.home_feed_pool_token = tok
         st.session_state.home_feed_visible = HOME_FEED_PAGE_SIZE
+        st.session_state.pop("home_feed_shuffled_pool", None)
 
     if "home_feed_visible" not in st.session_state:
         st.session_state.home_feed_visible = HOME_FEED_PAGE_SIZE
 
+    _refresh_home_feed_on_visit(tok)
+
     with st.status("Loading recipes…", expanded=False):
-        pool = _home_feed_pool(tok)
+        pool = _shuffled_home_feed_pool(tok, _home_feed_pool(tok))
     visible_n = min(int(st.session_state.home_feed_visible), len(pool))
     rec_items = pool[:visible_n]
 
