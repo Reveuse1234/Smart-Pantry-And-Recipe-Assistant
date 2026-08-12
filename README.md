@@ -1,4 +1,4 @@
-# Smart Pantry — separated frontend & backend
+# Smart Pantry 
 
 ## Live app
 
