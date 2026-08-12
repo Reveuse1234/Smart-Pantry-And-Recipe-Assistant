@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 from lib.api_client import PantryAPI
 from lib.expiry_ui import expiry_card_html
+from lib.pantry_options import pantry_category_selectbox, pantry_unit_selectbox
 from lib.ui import hero, inject_pastel_theme, sidebar_nav
 
 st.set_page_config(page_title="Ingredients", layout="wide")
@@ -34,8 +35,11 @@ with tab_m:
     with st.form("add"):
         name = st.text_input("Name *")
         qty = st.number_input("Quantity", value=1.0, step=0.1)
-        unit = st.text_input("Unit", value="each")
-        cat = st.text_input("Category", value="general")
+        u1, u2 = st.columns(2)
+        with u1:
+            unit = pantry_unit_selectbox(key="manual_unit")
+        with u2:
+            cat = pantry_category_selectbox(key="manual_category")
         exp = st.date_input("Expiration", value=None)
         bc = st.text_input("Barcode (optional)")
         notes = st.text_area("Notes")
@@ -123,8 +127,17 @@ with tab_scan:
                 key="scan_add_name",
             )
             qqty = st.number_input("Quantity", value=1.0, step=0.1, key="scan_add_qty")
-            qunit = st.text_input("Unit", value="each", key="scan_add_unit")
-            qcat = st.text_input("Category", value="general", key="scan_add_cat")
+            s1, s2 = st.columns(2)
+            with s1:
+                qunit = pantry_unit_selectbox(
+                    value=str(pre.get("unit") or "each"),
+                    key="scan_add_unit",
+                )
+            with s2:
+                qcat = pantry_category_selectbox(
+                    value=str(pre.get("category") or "general"),
+                    key="scan_add_cat",
+                )
             qnotes = st.text_area("Notes (optional)", key="scan_add_notes")
             c1, c2 = st.columns(2)
             with c1:
@@ -188,16 +201,31 @@ with tab_ocr:
         st.markdown("##### Suggested items")
         if st.session_state.get("_ocr_note"):
             st.caption(st.session_state["_ocr_note"])
+        h1, h2, h3, h4 = st.columns([3, 1, 1, 1])
+        h1.markdown("**Name**")
+        h2.markdown("**Qty**")
+        h3.markdown("**Unit**")
+        h4.markdown("**Category**")
         for i, row in enumerate(ocr_rows):
             if not isinstance(row, dict):
                 continue
-            c1, c2, c3 = st.columns([3, 1, 1])
+            c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
             with c1:
                 st.text_input("Name", value=str(row.get("name") or ""), key=f"ocr_nm_{i}")
             with c2:
                 st.number_input("Qty", value=float(row.get("quantity") or 1), key=f"ocr_q_{i}", min_value=0.1)
             with c3:
-                st.text_input("Unit", value=str(row.get("unit") or "each"), key=f"ocr_u_{i}")
+                pantry_unit_selectbox(
+                    value=str(row.get("unit") or "each"),
+                    key=f"ocr_u_{i}",
+                    label_visibility="collapsed",
+                )
+            with c4:
+                pantry_category_selectbox(
+                    value=str(row.get("category") or "general"),
+                    key=f"ocr_cat_{i}",
+                    label_visibility="collapsed",
+                )
         if st.button("Add all suggested to pantry", type="primary", key="ocr_add_all"):
             added = 0
             for i, row in enumerate(ocr_rows):
@@ -212,7 +240,9 @@ with tab_ocr:
                             "name": nm,
                             "quantity": float(st.session_state.get(f"ocr_q_{i}") or row.get("quantity") or 1),
                             "unit": str(st.session_state.get(f"ocr_u_{i}") or row.get("unit") or "each"),
-                            "category": str(row.get("category") or "general"),
+                            "category": str(
+                                st.session_state.get(f"ocr_cat_{i}") or row.get("category") or "general"
+                            ),
                         }
                     )
                     added += 1

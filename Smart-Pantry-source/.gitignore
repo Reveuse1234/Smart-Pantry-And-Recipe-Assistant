@@ -1,0 +1,16 @@
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/pantry.db
+.DS_Store
+.hf_cache/
+.streamlit/secrets.toml
+.env
+__pycache__/
+.pycache/
+.pycache_check/
+*.pyc
+.venv/
+venv/
+static/uploads/*
+!static/uploads/.gitkeep

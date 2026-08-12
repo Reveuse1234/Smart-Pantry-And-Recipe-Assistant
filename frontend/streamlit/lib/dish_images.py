@@ -29,6 +29,8 @@ _BLOCKED_FRAGMENTS = (
     "fileicon",
     "file-type-icons",
     "emma_kaliya",
+    "dry_fuit_vendor",
+    "dry_fuit",
     "/w/resources/assets/",
     "-dpla-",
     "_dpla_",

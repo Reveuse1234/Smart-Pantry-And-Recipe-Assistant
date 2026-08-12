@@ -1,0 +1,19 @@
+# Streamlit UX: fewer scary stack traces for end users; snappier reruns.
+# https://docs.streamlit.io/develop/concepts/configuration/options
+
+[client]
+showErrorDetails = true
+toolbarMode = "minimal"
+# Custom nav in lib/ui.py (logo + Smart Pantry + st.page_link) — hide duplicate auto page list.
+showSidebarNavigation = false
+
+[server]
+# Default is localhost-only; other devices on your Wi‑Fi cannot open the app. Use 0.0.0.0 for LAN access.
+address = "0.0.0.0"
+headless = true
+
+[runner]
+fastReruns = true
+
+[browser]
+gatherUsageStats = false

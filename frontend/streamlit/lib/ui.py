@@ -209,6 +209,12 @@ def sidebar_nav(current: str):
         )
         st.caption(APP_TAGLINE)
         st.markdown("---")
+        prev = st.session_state.get("_pf_active_page")
+        if current == "Home" and prev not in (None, "Home"):
+            st.session_state["home_feed_needs_refresh"] = True
+        elif current == "Home" and prev is None:
+            st.session_state["home_feed_needs_refresh"] = True
+        st.session_state["_pf_active_page"] = current
         pages = [
             ("Home", "Home.py"),
             ("Dashboard", "pages/01_Dashboard.py"),
